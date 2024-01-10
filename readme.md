@@ -7,4 +7,5 @@
 
    ```bash
    sudo cp internsctl /usr/bin/
+3. For man save the 'internsctl.1' file in man directory
 
