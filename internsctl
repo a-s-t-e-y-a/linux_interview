@@ -32,11 +32,11 @@ case $1 in
     "user")
         case $2 in
             "create")
-                if [ -z "$username" ]; then
+                if [ -z "$3" ]; then
                     echo "Enter the username kindly."
                     exit 1
                 fi
-                user=$username
+                user=$3
                 useradd -m -s /bin/bash $user
 
                 if [ $? -eq 0 ]; then
@@ -47,12 +47,46 @@ case $1 in
                 fi
                 ;;
             "list")
-                regular_users=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd)
-                echo "$regular_users"
-                ;;
-            *)
+                if [ "$option" == "--sudo-only" ]; then
+                    sudo_users=$(grep -Po '^sudo.+:\K.*$' /etc/group | tr ',' '\n')
+                    echo "Users with sudo permissions:"
+                    echo "$sudo_users"
+                else
+                    regular_users=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd)
+                    echo "All users:"
+                    echo "$regular_users"
+                fi
+                ;;            
+	     *)
                 echo "Invalid argument."
                 exit 1 
+                ;;
+        esac
+        ;;
+     "file")
+        case $2 in
+            "getinfo")
+                if [ -z "$3" ]; then
+                    echo "Please provide a file name."
+                    exit 1
+                fi
+
+                file_path=$3
+                if [ -e "$file_path" ]; then
+                    file_info=$(stat "$file_path")
+                    echo "File:"
+                    echo "Access:"
+                    echo "Size(B):"
+                    echo "Owner:"
+                    echo "$file_info"
+                else
+                    echo "File '$file_path' does not exist."
+                    exit 1
+                fi
+                ;;
+            *)
+                echo "Invalid argument for 'file'. Use 'getinfo'."
+                exit 1
                 ;;
         esac
         ;;
@@ -60,5 +94,5 @@ case $1 in
         echo "Usage: $0 {cpu|memory|user} getinfo"
         exit 1
         ;;
-es
+esac
 
