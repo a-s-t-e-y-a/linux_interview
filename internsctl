@@ -29,9 +29,36 @@ case $1 in
                 ;;
         esac
         ;;
+    "user")
+        case $2 in
+            "create")
+                if [ -z "$username" ]; then
+                    echo "Enter the username kindly."
+                    exit 1
+                fi
+                user=$username
+                useradd -m -s /bin/bash $user
+
+                if [ $? -eq 0 ]; then
+                    echo "User created successfully."
+                else
+                    echo "Error creating $user."
+                    exit 1
+                fi
+                ;;
+            "list")
+                regular_users=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd)
+                echo "$regular_users"
+                ;;
+            *)
+                echo "Invalid argument."
+                exit 1 
+                ;;
+        esac
+        ;;
     *)
-        echo "Usage: $0 {cpu|memory} getinfo"
+        echo "Usage: $0 {cpu|memory|user} getinfo"
         exit 1
         ;;
-esac
+es
 
