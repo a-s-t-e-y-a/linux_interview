@@ -71,16 +71,60 @@ case $1 in
                     exit 1
                 fi
 
-                file_path=$3
-                if [ -e "$file_path" ]; then
-                    file_info=$(stat "$file_path")
-                    echo "File:"
-                    echo "Access:"
-                    echo "Size(B):"
-                    echo "Owner:"
-                    echo "$file_info"
+                file_name=$3
+                if [ -e "$file_name" ]; then
+                    size_option=false
+                    permissions_option=false
+                    owner_option=false
+                    last_modified_option=false
+
+                    while [ "$#" -gt 0 ]; do
+                        case "$1" in
+                            --size|-s)
+                                size_option=true
+                                ;;
+                            --permissions|-p)
+                                permissions_option=true
+                                ;;
+                            --owner|-o)
+                                owner_option=true
+                                ;;
+                            --last-modified|-m)
+                                last_modified_option=true
+                                ;;
+                            *)
+                                echo "Invalid option: $1"
+                                exit 1
+                                ;;
+                        esac
+                        shift
+                    done
+
+                    file_info=$(stat "$file_name")
+
+                    if [ "$size_option" = true ]; then
+                        echo "Size(B): $(echo "$file_info" | grep "Size:" | awk '{print $2}')"
+                    fi
+
+                    if [ "$permissions_option" = true ]; then
+                        echo "Permissions: $(echo "$file_info" | grep "Access:" | awk '{print $2}')"
+                    fi
+
+                    if [ "$owner_option" = true ]; then
+                        echo "Owner: $(echo "$file_info" | grep "Uid:" | awk '{print $4}')"
+                    fi
+
+                    if [ "$last_modified_option" = true ]; then
+                        echo "Last Modified: $(echo "$file_info" | grep "Modify:" | awk '{print $2, $3, $4, $5}')"
+                    fi
+
+                    # If no specific options provided, print the entire file information
+                    if [ "$size_option" = false ] && [ "$permissions_option" = false ] && [ "$owner_option" = false ] && [ "$last_modified_option" = false ]; then
+                        echo "File Information:"
+                        echo "$file_info"
+                    fi
                 else
-                    echo "File '$file_path' does not exist."
+                    echo "File '$file_name' does not exist."
                     exit 1
                 fi
                 ;;
