@@ -1,6 +1,6 @@
-i#!/bin/bash
+#!/bin/bash
 
-# internsctl script to get CPU information
+# internsctl script to get CPU and Memory information
 
 case $1 in
     "cpu")
@@ -16,8 +16,21 @@ case $1 in
                 ;;
         esac
         ;;
+    "memory")
+        case $2 in
+            "getinfo")
+                mem_info=$(free)
+                echo "Memory Information:"
+                echo "$mem_info"
+                ;;
+            *)
+                echo "Invalid argument for 'memory'. Use 'getinfo'."
+                exit 1
+                ;;
+        esac
+        ;;
     *)
-        echo "Usage: $0 cpu getinfo"
+        echo "Usage: $0 {cpu|memory} getinfo"
         exit 1
         ;;
 esac
